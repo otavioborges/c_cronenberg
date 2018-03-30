@@ -1,27 +1,25 @@
 .PHONY: clean
 
+CXXFLAGS= -fPIC -Wall -std=c++11 -g3
+LDFLAGS= -shared
+
 BINDIR= build
-SRCDIR= src
 
-LDFLAGS= -lbluetooth -lpthread -lmysqlpp -lcurl
-CXXFLAGS= -I/usr/include/mysql -I/usr/include/mysql++ -lmysqlpp -std=c++11 -g3
+SOURCES= $(wildcard *.cpp)
+OBJECTS= $(patsubst %.cpp,$(BINDIR)/%.o,$(SOURCES))
 
-SOURCES= $(wildcard $(SRCDIR)/*.cpp)
-INCLUDES= $(wildcard $(SRCDIR)/*.h)
-OBJECTS= $(SOURCES:$(SRCDIR)/%.cpp=$(BINDIR)/%.o)
+TARGET_LIB= libcronenberg.so
 
-TARGET= advFetcher
-
-all: dir $(BINDIR)/$(TARGET)
+all: dir $(BINDIR)/$(TARGET_LIB)
 
 dir:
-		mkdir -p $(BINDIR)
+	mkdir -p $(BINDIR)
 
 clean:
-		rm -f $(BINDIR)/*.o $(BINDIR)/$(TARGET)
+	rm -f $(BINDIR)/*o $(BINDIR)/$(TARGET_LIB)
 
-$(BINDIR)/$(TARGET): $(OBJECTS)
-		$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
+$(BINDIR)/$(TARGET_LIB): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
 
-$(OBJECTS): $(BINDIR)/%.o : $(SRCDIR)/%.cpp
-		$(CXX) -c $(CXXFLAGS) $^ -o $@
+$(BINDIR)/%.o : %.cpp
+	$(CXX) -c $(CXXFLAGS) $^ -o $@ -lpthread
