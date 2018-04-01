@@ -4,7 +4,7 @@
 #include "cronenberg.h"
 
 enum class cronenberg::PacketType {
-	DataType	= 0x01,
+	DataPacket	= 0x01,
 	ACK			= 0x02,
 	NACK		= 0x03,
 	Ping		= 0x04,

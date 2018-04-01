@@ -6,9 +6,10 @@
 
 class cronenberg::PacketPayload {
 	public:
-		static const PacketType TYPE;
-		virtual uint16_t Size(void) = 0;
+		virtual uint16_t Length(void) = 0;
 		virtual void Parse(uint8_t *data, uint16_t *resultLength) = 0;
+		virtual cronenberg::PacketType GetType(void) const = 0;
+		static PacketPayload *Copy(const PacketPayload &copy);
 };
 
 #endif /* PACKETPAYLOAD_H_ */

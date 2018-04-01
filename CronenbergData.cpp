@@ -1,38 +1,29 @@
+#include <string.h>
 #include "CronenbergData.h"
 
 using namespace cronenberg;
+
+void CronenbergData::DataToArray(uint8_t *data, uint16_t *length){
+	if (m_dataFormat == DataType::Booleans || m_dataFormat == DataType::UsignedShort
+		|| m_dataFormat == DataType::SignedShort){
+		memcpy(data, (uint8_t *)&m_value, 1);
+		*length += 1;
+	}else if (m_dataFormat == DataType::UnsginedInteger
+		|| m_dataFormat == DataType::SignedInteger){
+		memcpy(data, (uint8_t *)&m_value, 2);
+		*length += 2;
+	}else{
+		memcpy(data, (uint8_t *)&m_value, 4);
+		*length += 4;
+	}
+}
 
 CronenbergData::CronenbergData(uint16_t nodeID, uint16_t timestamp, DataType format, void *value) {
 	m_nodeID = nodeID;
 	m_timestamp = timestamp;
 	m_dataFormat = format;
 
-	switch (m_dataFormat) {
-		case DataType::Booleans:
-			m_booleanValue = *((uint8_t *)value);
-			break;
-		case DataType::UsignedShort:
-			m_uShortvalue = *((uint8_t *)value);
-			break;
-		case DataType::SignedShort:
-			m_ShortValue = *((int8_t *)value);
-			break;
-		case DataType::UnsginedInteger:
-			m_uIntValue = *((uint16_t *)value);
-			break;
-		case DataType::SignedInteger:
-			m_intValue = *((int16_t *)value);
-			break;
-		case DataType::UnsignedLong:
-			m_uLongValue = *((uint32_t *)value);
-			break;
-		case DataType::SignedLong:
-			m_longValue = *((int32_t *)value);
-			break;
-		case DataType::Float:
-			m_floatValue = *((float *)value);
-			break;
-	}
+	m_value = *((uint32_t *)value);
 }
 
 uint16_t CronenbergData::GetNodeID(void) {
@@ -52,7 +43,7 @@ uint16_t CronenbergData::Length(void) {
 	if (m_dataFormat == DataType::Booleans || m_dataFormat == DataType::UsignedShort
 		|| m_dataFormat == DataType::SignedShort)
 		overhead += 1;
-	else if (m_dataFormat == DataType::UnsginedInteger || m_dataFormat == DataType::SignedShort)
+	else if (m_dataFormat == DataType::UnsginedInteger || m_dataFormat == DataType::SignedInteger)
 		overhead += 2;
 	else
 		overhead += 4;
@@ -61,13 +52,11 @@ uint16_t CronenbergData::Length(void) {
 }
 
 void CronenbergData::Parse(uint8_t *data, uint16_t *resultLength) {
-	data = new uint8_t[5];
-
+	*resultLength = 5;
 	data[0] = m_nodeID;
 	data[1] = (m_nodeID >> 8);
 	data[2] = m_timestamp;
 	data[3] = (m_timestamp >> 8);
 	data[4] = (uint8_t)m_dataFormat;
-
-	*resultLength = 5;
+	DataToArray((data + 5), resultLength);
 }
