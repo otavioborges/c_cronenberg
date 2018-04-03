@@ -92,6 +92,8 @@ string CronenbergData::ToString(void) {
 	} else if (m_dataFormat == DataType::Float) {
 		sprintf(aux, "%.4f", ((float)m_value));
 		return string(aux);
+	} else {
+		return "";
 	}
 }
 
