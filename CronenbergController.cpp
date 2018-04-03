@@ -301,7 +301,10 @@ bool CronenbergController::RunNode(void){
     packet->AddPayload(new RequestID(GetUUID()));
 
     m_threadArgs.status = ControllerStatus::WaitingSenderID;
+    pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
     m_threadArgs.outgoing.push_back(packet);
+    pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
+    sem_post(&CronenbergController::MSG_QUEUE);
 
     m_threadArgs.running = true;
     int result = pthread_create(&m_runnerThread, NULL, NodeRoutine, (void *)&m_threadArgs);
@@ -351,6 +354,10 @@ bool CronenbergController::ReceiveData(uint8_t *data, uint16_t size){
     }
 
     return true;
+}
+
+uint8_t CronenbergController::GetID(void){
+    return m_threadArgs.senderID;
 }
 
 uint32_t CronenbergController::GetCurrentTimestamp(void){
