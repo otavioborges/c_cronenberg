@@ -158,8 +158,6 @@ bool CronenbergPacket::Parse(uint8_t *data, uint16_t *returnedLength){
 	if(m_payload != NULL){
 		m_payload->Parse((data+offset), &payloadLength);
 		offset += payloadLength;
-	}else{
-		offset++; // no payload!
 	}
 	uint16_t crc = CalculateChecksum(data, offset);
 	memcpy((data+offset), (uint8_t *)&crc, 2);
