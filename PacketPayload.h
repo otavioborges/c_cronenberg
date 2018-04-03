@@ -6,7 +6,7 @@
 
 class cronenberg::PacketPayload {
 	public:
-		static PacketPayload* Receive(uint8_t *data, uint16_t length) { return NULL; };
+		static PacketPayload* Receive(uint8_t *data, uint16_t length, cronenberg::PacketType type);
 		virtual ~PacketPayload(void) {};
 		virtual uint16_t Length(void) = 0;
 		virtual void Parse(uint8_t *data, uint16_t *resultLength) = 0;

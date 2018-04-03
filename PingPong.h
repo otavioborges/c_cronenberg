@@ -19,7 +19,7 @@ class cronenberg::PingPong : public cronenberg::PacketPayload {
 		};
 		PingPong(PingPong::Type type):
 			m_type((uint8_t)type) {};
-		PingPong* Receive(uint8_t *data, uint16_t length);
+		static PingPong* Receive(uint8_t *data, uint16_t length);
 		~PingPong(void);
 		uint16_t Length(void);
 		void Parse(uint8_t *data, uint16_t *resultLength);

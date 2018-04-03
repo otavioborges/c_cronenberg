@@ -14,7 +14,7 @@ class cronenberg::ResponseID : public cronenberg::PacketPayload {
 	public:
 		static const uint8_t DEFAULT_UUID_SIZE = 25;
 		ResponseID(uint8_t *uuid, uint8_t senderID);
-		ResponseID* Receive(uint8_t *data, uint16_t length);
+		static ResponseID* Receive(uint8_t *data, uint16_t length);
 		~ResponseID(void);
 		uint16_t Length(void);
 		void Parse(uint8_t *data, uint16_t *resultLength);

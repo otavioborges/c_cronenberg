@@ -21,7 +21,7 @@ class cronenberg::AckNack : public cronenberg::PacketPayload {
 		};
 		AckNack(AckNack::Result result, uint8_t sender, uint8_t packetID):
 			m_ack((uint8_t)result), m_sender(sender), m_packetID(packetID) {};
-		AckNack* Receive(uint8_t *data, uint16_t length);
+		static AckNack* Receive(uint8_t *data, uint16_t length);
 		~AckNack(void);
 		uint16_t Length(void);
 		void Parse(uint8_t *data, uint16_t *resultLength);
