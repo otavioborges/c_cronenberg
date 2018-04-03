@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 #include "CronenbergController.h"
 
 // Packet Types
@@ -33,13 +34,17 @@ bool CronenbergController::VerifyUUID(uint8_t *recvUUID){
 }
 
 void *CronenbergController::NodeRoutine(void *args){
+	struct timespec semaphoreTimeout = {
+		.tv_sec = 0,
+		.tv_nsec = 100000000
+	}
     CronenbergPacket *packet;
     controller_t *arguments = (controller_t *)args;
     uint16_t recvLength;
     uint8_t *recvData;
 
     while(arguments->running){
-        sem_wait(&CronenbergController::MSG_QUEUE);
+		sem_timedwait(&CronenbergController::MSG_QUEUE, &semaphoreTimeout);
         if(arguments->incomming.size() > 0){
             pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
             packet = arguments->incomming[0];
@@ -139,11 +144,15 @@ void *CronenbergController::NodeRoutine(void *args){
 }
 
 void *CronenbergController::BaseRoutine(void *args){
-    CronenbergPacket *packet;
-    controller_t *arguments = (controller_t *)args;
+	struct timespec semaphoreTimeout = {
+		.tv_sec = 0,
+		.tv_nsec = 100000000
+	}
+	CronenbergPacket *packet;
+	controller_t *arguments = (controller_t *)args;
 
-    while(arguments->running){
-        sem_wait(&CronenbergController::MSG_QUEUE);
+	while (arguments->running) {
+		sem_timedwait(&CronenbergController::MSG_QUEUE, &semaphoreTimeout);
         if(arguments->incomming.size() > 0){
             pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
             packet = arguments->incomming[0];
