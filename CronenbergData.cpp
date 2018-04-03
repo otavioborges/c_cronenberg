@@ -63,44 +63,35 @@ void CronenbergData::Parse(uint8_t *data, uint16_t *resultLength) {
 
 string CronenbergData::ToString(void) {
 	char aux[10];
-	switch (m_dataFormat) {
-		case DataType::Booleans:
-			uint8_t auxData = (uint8_t)m_value;
-			sprintf(aux, "{%d, %d, %d, %d, %d, %d, %d, %d}",
-				((auxData & 0x80) != 0), ((auxData & 0x40) != 0), ((auxData & 0x20) != 0),
-				((auxData & 0x10) != 0), ((auxData & 0x08) != 0), ((auxData & 0x04) != 0),
-				((auxData & 0x02) != 0), ((auxData & 0x01) != 0));
+	if (m_dataFormat == DataType::Booleans) {
+		uint8_t auxData = (uint8_t)m_value;
+		sprintf(aux, "{%d, %d, %d, %d, %d, %d, %d, %d}",
+			((auxData & 0x80) != 0), ((auxData & 0x40) != 0), ((auxData & 0x20) != 0),
+			((auxData & 0x10) != 0), ((auxData & 0x08) != 0), ((auxData & 0x04) != 0),
+			((auxData & 0x02) != 0), ((auxData & 0x01) != 0));
 
-			return string(aux);
-			break;
-		case DataType::UsignedShort:
-			sprintf(aux, "%d", ((uint8_t)m_value));
-			return string(aux);
-			break;
-		case DataType::SignedShort:
-			sprintf(aux, "%d", ((int8_t)m_value));
-			return string(aux);
-			break;
-		case DataType::UnsginedInteger:
-			sprintf(aux, "%d", ((uint16_t)m_value));
-			return string(aux);
-			break;
-		case DataType::SignedInteger:
-			sprintf(aux, "%d", ((int16_t)m_value));
-			return string(aux);
-			break;
-		case DataType::UnsignedLong:
-			sprintf(aux, "%d", ((uint32_t)m_value));
-			return string(aux);
-			break;
-		case DataType::SignedLong:
-			sprintf(aux, "%d", ((int32_t)m_value));
-			return string(aux);
-			break;
-		case DataType::Float:
-			sprintf(aux, "%.4f", ((float)m_value));
-			return string(aux);
-			break;
+		return string(aux);
+	} else if (m_dataFormat == DataType::UsignedShort) {
+		sprintf(aux, "%d", ((uint8_t)m_value));
+		return string(aux);
+	} else if (m_dataFormat == DataType::SignedShort) {
+		sprintf(aux, "%d", ((int8_t)m_value));
+		return string(aux);
+	} else if (m_dataFormat == DataType::UnsginedInteger) {
+		sprintf(aux, "%d", ((uint16_t)m_value));
+		return string(aux);
+	} else if (m_dataFormat == DataType::SignedInteger) {
+		sprintf(aux, "%d", ((int16_t)m_value));
+		return string(aux);
+	} else if (m_dataFormat == DataType::UnsignedLong) {
+		sprintf(aux, "%d", ((uint32_t)m_value));
+		return string(aux);
+	} else if (m_dataFormat == DataType::SignedLong) {
+		sprintf(aux, "%d", ((int32_t)m_value));
+		return string(aux);
+	} else if (m_dataFormat == DataType::Float) {
+		sprintf(aux, "%.4f", ((float)m_value));
+		return string(aux);
 	}
 }
 
