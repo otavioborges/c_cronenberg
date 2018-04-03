@@ -56,19 +56,17 @@ CronenbergPacket::CronenbergPacket(uint8_t *data, uint16_t length) {
 	m_packetID = data[9];
 
 	uint16_t payloadSize = packetSize - CronenbergPacket::OVERHEAD;
-	switch(m_type){
-		case PacketType::DataPacket:
-			m_payload = new DataPacket((data+10), payloadSize);
-			break;
-		case PacketType::ACK:
-        case PacketType::NACK:
-        case PacketType::Ping:
-        case PacketType::Pong:
-        case PacketType::PacketArray:
-        case PacketType::Sync:
-		default:
-            m_payload = NULL;
-			break;
+	if(payloadSize == 0){
+		m_payload = NULL;
+		// if its sync no problem
+		if(m_type == PacketType::Sync){
+
+			m_isValid = true;
+		}else{
+			m_isValid = false; // shit happened
+		}
+	}else{
+		m_payload = PacketPayload::Receive((data+10), payloadSize);
 	}
 }
 
@@ -89,6 +87,29 @@ void CronenbergPacket::AddPayload(cronenberg::PacketPayload *payload){
 	m_payload = PacketPayload::Copy(*payload);
 
 	m_isValid = true;
+}
+
+void CronenbergPacket::SetAsSync(void){
+	m_type = PacketType::Sync;
+	m_payload = NULL;
+
+	m_isValid = true;
+}
+
+PacketType CronenbergPacket::GetPacketType(void){
+	return m_type;
+}
+
+uint8_t CronenbergPacket::GetSender(void){
+	return m_sender;
+}
+
+uint8_t CronenbergPacket::GetDestination(void){
+	return m_destination;
+}
+
+uint8_t CronenbergPacket::GetPacketID(void){
+	return m_packetID;
 }
 
 uint16_t CronenbergPacket::GetLength(void){
@@ -131,8 +152,12 @@ bool CronenbergPacket::Parse(uint8_t *data, uint16_t *returnedLength){
 	data[offset++] = m_sender;
 	data[offset++] = m_destination;
 	data[offset++] = m_packetID;
-	m_payload->Parse((data+offset), &payloadLength);
-	offset += payloadLength;
+	if(m_payload != NULL){
+		m_payload->Parse((data+offset), &payloadLength);
+		offset += payloadLength;
+	}else{
+		offset++; // no payload!
+	}
 	uint16_t crc = CalculateChecksum(data, offset);
 	memcpy((data+offset), (uint8_t *)&crc, 2);
 	offset += 2;

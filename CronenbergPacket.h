@@ -28,8 +28,13 @@ class cronenberg::CronenbergPacket {
 		~CronenbergPacket(void);
 
 		void AddPayload(cronenberg::PacketPayload *payload);
+		void SetAsSync(void);
 
 		// GEt methods
+		cronenberg::PacketType GetPacketType(void);
+		uint8_t GetSender(void);
+		uint8_t GetDestination(void);
+		uint8_t GetPacketID(void);
 		uint16_t GetLength(void);
 		uint16_t GetTimeDiff(void);
 		uint32_t GetTimestamp(void);

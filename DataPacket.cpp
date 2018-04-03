@@ -8,16 +8,18 @@ DataPacket::DataPacket(vector<CronenbergData *> data) {
 	m_data = data;
 }
 
-DataPacket::DataPacket(uint8_t *data, uint16_t length){
+DataPacket* DataPacket::Receive(uint8_t *data, uint16_t length){
 	uint16_t offset = 0;
 	uint16_t nodeID = 0;
 	uint16_t timestamp = 0;
 	DataType format;
+
+	DataPacket *rtnValue = new DataPacket();
 	while(offset < length){
 		memcpy(&nodeID, (data + offset), 2);
 		memcpy(&timestamp, (data + offset + 2), 2);
 		format = (DataType)data[4 + offset];
-		m_data.push_back(new CronenbergData(nodeID, timestamp, format, (void *)(data + offset + 5)));
+		rtnValue->m_data.push_back(new CronenbergData(nodeID, timestamp, format, (void *)(data + offset + 5)));
 		
 		if(format == DataType::Booleans || format == DataType::UsignedShort
 			|| format == DataType::SignedShort)
@@ -27,6 +29,8 @@ DataPacket::DataPacket(uint8_t *data, uint16_t length){
 		else
 			offset += 9;
 	}
+
+	return rtnValue;
 }
 
 DataPacket::~DataPacket(void){
@@ -41,6 +45,10 @@ DataPacket::~DataPacket(void){
 
 void DataPacket::AddData(CronenbergData *data) {
 	m_data.push_back(data);
+}
+
+vector<CronenbergData *> DataPacket::GetData(void){
+	return m_data;
 }
 
 uint16_t DataPacket::Length(void) {

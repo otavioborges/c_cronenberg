@@ -5,12 +5,12 @@
 
 enum class cronenberg::PacketType {
 	DataPacket	= 0x01,
-	ACK			= 0x02,
-	NACK		= 0x03,
-	Ping		= 0x04,
-	Pong		= 0x05,
-	PacketArray	= 0x06,
-	Sync		= 0x07
+	AckNack		= 0x02,
+	PingPong	= 0x03,
+	PacketArray	= 0x04,
+	Sync		= 0x05,
+	RequestID	= 0x06,
+	ResponseID  = 0x07
 };
 
 #endif /* PACKETTYPE_H_ */
