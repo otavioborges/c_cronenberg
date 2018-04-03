@@ -343,7 +343,7 @@ bool CronenbergController::ReceiveData(uint8_t *data, uint16_t size){
     if(packet->IsValid()){
 		pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
         m_threadArgs.incomming.push_back(packet);
-		pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
+		pthread_mutex_unlock(&CronenbergController::MUTEX_INCOMMING);
 		sem_post(&CronenbergController::MSG_QUEUE);
 
         if(packetType == PacketType::DataPacket || packetType == PacketType::PacketArray || packetType == PacketType::Sync){
