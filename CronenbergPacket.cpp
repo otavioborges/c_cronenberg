@@ -113,7 +113,10 @@ uint8_t CronenbergPacket::GetPacketID(void){
 }
 
 uint16_t CronenbergPacket::GetLength(void){
-	return CronenbergPacket::OVERHEAD + m_payload->Length();
+	if(m_type == PacketType::Sync)
+		return CronenbergPacket::OVERHEAD;
+	else
+		return CronenbergPacket::OVERHEAD + m_payload->Length();
 }
 
 uint16_t CronenbergPacket::GetTimeDiff(void){
