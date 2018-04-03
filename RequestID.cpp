@@ -11,6 +11,10 @@ RequestID *RequestID::Receive(uint8_t *data, uint16_t length){
 	return new RequestID(data);
 }
 
+RequestID::RequestID(uint8_t *uuid) {
+	memcpy(m_uuid, uuid, RequestID::DEFAULT_UUID_SIZE);
+}
+
 RequestID::~RequestID(void){
 	// no memory location no need for destructor
 }

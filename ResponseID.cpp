@@ -11,6 +11,11 @@ ResponseID *ResponseID::Receive(uint8_t *data, uint16_t length){
 	return new ResponseID(data, data[25]);
 }
 
+ResponseID::ResponseID(uint8_t *uuid, uint8_t senderID) {
+	memcpy(m_uuid, uuid, ResponseID::DEFAULT_UUID_SIZE);
+	m_recvSenderID = senderID;
+}
+
 ResponseID::~ResponseID(void){
 	// no memory location no need for destructor
 }
