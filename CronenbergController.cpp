@@ -341,7 +341,11 @@ bool CronenbergController::ReceiveData(uint8_t *data, uint16_t size){
     uint8_t packetID = packet->GetPacketID();
     PacketType packetType = packet->GetType();
     if(packet->IsValid()){
-        m_threadArgs.incomming.push_back(packet);        
+		pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
+        m_threadArgs.incomming.push_back(packet);
+		pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
+		sem_post(&CronenbergController::MSG_QUEUE);
+
         if(packetType == PacketType::DataPacket || packetType == PacketType::PacketArray || packetType == PacketType::Sync){
             packet = new CronenbergPacket(m_threadArgs.senderID, destination);
             packet->AddPayload(new AckNack(AckNack::Result::ACK, m_threadArgs.senderID, packetID));
