@@ -355,6 +355,10 @@ bool CronenbergController::ReceiveData(uint8_t *data, uint16_t size){
     return true;
 }
 
+uint8_t CronenbergController::GetID(void){
+    return m_threadArgs.senderID;
+}
+
 uint32_t CronenbergController::GetCurrentTimestamp(void){
     return GetTimestamp() - m_threadArgs.timestampOffset;
 }

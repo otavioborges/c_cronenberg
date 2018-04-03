@@ -54,6 +54,7 @@ class cronenberg::CronenbergController{
         bool RunBase(void);
         
         bool ReceiveData(uint8_t *data, uint16_t size);
+        uint8_t GetID(void);
         uint8_t *GetUUID(void);                                              // must be overloaded
         void SendData(uint8_t senderID, uint8_t *data, uint16_t size);       // must be overloaded
         uint32_t GetTimestamp(void);                                         // must be overloaded
