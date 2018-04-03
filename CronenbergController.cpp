@@ -75,7 +75,7 @@ void *CronenbergController::NodeRoutine(void *args){
                     recvLength = pongResponse->GetLength();
                     recvData = new uint8_t[recvLength];
                     pongResponse->Parse(recvData, &recvLength);
-                    INSTANCE->SendData(recvData, recvLength);
+					INSTANCE->SendData(packet->GetSender(), recvData, recvLength);
 
                     delete pongResponse;
                     delete[] recvData;
@@ -96,7 +96,7 @@ void *CronenbergController::NodeRoutine(void *args){
                     recvLength = sync->GetLength();
                     recvData = new uint8_t[recvLength];
                     sync->Parse(recvData, &recvLength);
-                    INSTANCE->SendData(recvData, recvLength);
+                    INSTANCE->SendData(packet->GetSender(), recvData, recvLength);
 
                     pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
                     arguments->outgoing.push_back(sync);
@@ -120,7 +120,7 @@ void *CronenbergController::NodeRoutine(void *args){
             uint16_t sendLength = packet->GetLength();
             uint8_t *sendData = new uint8_t[sendLength];
             packet->Parse(sendData, &sendLength);
-            INSTANCE->SendData(sendData, sendLength);
+            INSTANCE->SendData(packet->GetSender(), sendData, sendLength);
             delete[] sendData;
 
             // remove if no need for ACK
@@ -220,7 +220,7 @@ void *CronenbergController::BaseRoutine(void *args){
             uint16_t sendLength = packet->GetLength();
             uint8_t *sendData = new uint8_t[sendLength];
             packet->Parse(sendData, &sendLength);
-            INSTANCE->SendData(sendData, sendLength);
+            INSTANCE->SendData(packet->GetSender(), sendData, sendLength);
             delete[] sendData;
 
             // remove if no need for ACK
