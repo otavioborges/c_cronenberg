@@ -66,7 +66,7 @@ CronenbergPacket::CronenbergPacket(uint8_t *data, uint16_t length) {
 			m_isValid = false; // shit happened
 		}
 	}else{
-		m_payload = PacketPayload::Receive((data+10), payloadSize);
+		m_payload = PacketPayload::ReceiveFromArray((data+10), payloadSize, m_type);
 	}
 }
 

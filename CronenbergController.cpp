@@ -220,7 +220,7 @@ void *CronenbergController::BaseRoutine(void *args){
             uint16_t sendLength = packet->GetLength();
             uint8_t *sendData = new uint8_t[sendLength];
             packet->Parse(sendData, &sendLength);
-            INSTANCE->SendData(packet->GetSender(), sendData, sendLength);
+            INSTANCE->SendData(packet->GetDestination(), sendData, sendLength);
             delete[] sendData;
 
             // remove if no need for ACK

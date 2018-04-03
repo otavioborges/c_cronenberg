@@ -9,7 +9,7 @@
 
 using namespace cronenberg;
 
-PacketPayload* PacketPayload::Receive(uint8_t *data, uint16_t length, cronenberg::PacketType type) {
+PacketPayload* PacketPayload::ReceiveFromArray(uint8_t *data, uint16_t length, cronenberg::PacketType type) {
 	switch (type) {
 		case cronenberg::PacketType::DataPacket:
 			return DataPacket::Receive(data, length);
