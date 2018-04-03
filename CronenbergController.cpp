@@ -331,7 +331,6 @@ bool CronenbergController::ReceiveData(uint8_t *data, uint16_t size){
 
     CronenbergPacket *packet = new CronenbergPacket(data, size);
     if(packet->GetDestination() != m_threadArgs.senderID){
-        delete[] data;
         return false;
     }
 
@@ -351,7 +350,6 @@ bool CronenbergController::ReceiveData(uint8_t *data, uint16_t size){
         }
     }
 
-    delete[] data;
     return true;
 }
 
