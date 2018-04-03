@@ -37,7 +37,7 @@ void *CronenbergController::NodeRoutine(void *args){
 	struct timespec semaphoreTimeout = {
 		.tv_sec = 0,
 		.tv_nsec = 100000000
-	}
+	};
     CronenbergPacket *packet;
     controller_t *arguments = (controller_t *)args;
     uint16_t recvLength;
@@ -147,7 +147,7 @@ void *CronenbergController::BaseRoutine(void *args){
 	struct timespec semaphoreTimeout = {
 		.tv_sec = 0,
 		.tv_nsec = 100000000
-	}
+	};
 	CronenbergPacket *packet;
 	controller_t *arguments = (controller_t *)args;
 
