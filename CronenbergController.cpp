@@ -281,7 +281,7 @@ CronenbergController::~CronenbergController(void){
 CronenbergController *CronenbergController::GetInstance(void){
     if(CronenbergController::INSTANCE == NULL){
         int result = sem_init(&CronenbergController::MSG_QUEUE, 0, 0);
-        if(result < 0){
+        if(result >= 0){
             CronenbergController::INSTANCE = new CronenbergController();
         }
     }

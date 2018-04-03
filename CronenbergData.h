@@ -1,6 +1,7 @@
 #ifndef CRONENBERGDATA_H_
 #define CRONENBERGDATA_H_
 
+#include <string>
 #include <stdint.h>
 #include "cronenberg.h"
 #include "DataType.h"
@@ -22,6 +23,16 @@ class cronenberg::CronenbergData{
 		cronenberg::DataType GetDataFormat(void);
 		uint16_t Length(void);
 		void Parse(uint8_t *data, uint16_t *resultLength);
+
+		// Get Data Methods
+		std::string ToString(void);
+		void GetData(uint8_t *result);
+		void GetData(int8_t *result);
+		void GetData(uint16_t *result);
+		void GetData(int16_t *result);
+		void GetData(uint32_t *result);
+		void GetData(int32_t *result);
+		void GetData(float *result);
 };
 
 #endif /* CRONENBERGDATA_H_ */
