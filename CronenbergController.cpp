@@ -44,7 +44,11 @@ void *CronenbergController::NodeRoutine(void *args){
     uint8_t *recvData;
 
     while(arguments->running){
-		sem_timedwait(&CronenbergController::MSG_QUEUE, &semaphoreTimeout);
+		if ((arguments->incomming.size() == 0) && (arguments->outgoing.size() == 0)) {
+			usleep(1000);
+			continue;
+		}
+		//sem_timedwait(&CronenbergController::MSG_QUEUE, &semaphoreTimeout);
         if(arguments->incomming.size() > 0){
             pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
             packet = arguments->incomming[0];
@@ -152,7 +156,11 @@ void *CronenbergController::BaseRoutine(void *args){
 	controller_t *arguments = (controller_t *)args;
 
 	while (arguments->running) {
-		sem_timedwait(&CronenbergController::MSG_QUEUE, &semaphoreTimeout);
+		if ((arguments->incomming.size() == 0) && (arguments->outgoing.size() == 0)) {
+			usleep(1000);
+			continue;
+		}
+		//sem_timedwait(&CronenbergController::MSG_QUEUE, &semaphoreTimeout);
         if(arguments->incomming.size() > 0){
             pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
             packet = arguments->incomming[0];
