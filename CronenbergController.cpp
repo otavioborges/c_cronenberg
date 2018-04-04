@@ -279,12 +279,13 @@ void CronenbergController::ClearBuffers(void){
 
 NodeInfo *CronenbergController::GetNodeInfo(uint8_t senderID){
     NodeInfo *senderNode = new NodeInfo(senderID);
-    nodeIt nInfo;
-    nInfo = m_threadArgs.nodes.find(senderNode);
-    if(nInfo != m_threadArgs.nodes.end())
-        return (*nInfo);
-    else
-        return NULL;
+    nodeIt nInfo = m_threadArgs.nodes.begin();
+	while (nInfo != m_threadArgs.nodes.end()) {
+		if ((*nInfo)->GetSenderID() == senderID)
+			return (*nInfo);
+	}
+
+	return NULL;
 }
 
 CronenbergPacket *CronenbergController::GetFirstExpired(void) {
