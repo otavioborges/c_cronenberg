@@ -229,33 +229,28 @@ void *CronenbergController::BaseRoutine(void *args){
         }else if(arguments->outgoing.size() > 0){
             // thread sending
 			pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-			packet = INSTANCE->GetFirstExpired();
+			outputIt nextToSend = INSTANCE->GetFirstExpired();
 			pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
-			if (packet == NULL) {
+			if (nextToSend == arguments->outgoing.end()) {
 				usleep(1000);
 				continue; // nothing to do
 			}
 
-            uint16_t sendLength = packet->GetLength();
-            uint8_t *sendData = new uint8_t[sendLength];
-            packet->Parse(sendData, &sendLength);
-            INSTANCE->SendData(packet->GetDestination(), sendData, sendLength);
-			if (packet->GetPacketType() == PacketType::ResponseID) {
-				ResponseID *payload = (ResponseID *)packet->GetPayload();
-				INSTANCE->UpdateSenderID(packet->GetDestination(), payload->GetReceivedID());
+			packet = nextToSend->first;
+			uint16_t sendLength = packet->GetLength();
+			uint8_t *sendData = new uint8_t[sendLength];
+			packet->Parse(sendData, &sendLength);
+			INSTANCE->SendData(packet->GetSender(), sendData, sendLength);
+			delete[] sendData;
+
+			// remove if no need for ACK
+			PacketType packetType = packet->GetType();
+			if (packetType == PacketType::PingPong || packetType == PacketType::RequestID || packetType == PacketType::ResponseID) {
+				pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
+				delete packet;
+				arguments->outgoing.erase(nextToSend);
+				pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
 			}
-
-            delete[] sendData;
-
-            // remove if no need for ACK
-            PacketType packetType = packet->GetType();
-            if(packetType != PacketType::DataPacket && packetType != PacketType::Sync && packetType != PacketType::PacketArray){
-                pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-                outputIt it = arguments->outgoing.
-                delete packet;
-                arguments->outgoing.erase(it);
-                pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
-            }
         }
     }
 
