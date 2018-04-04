@@ -204,9 +204,7 @@ void *CronenbergController::BaseRoutine(void *args){
                 pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
                 arguments->outgoing.push_back(outPair(response, INSTANCE->GetTimestamp()));
                 pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
-                sem_post(&CronenbergController::MSG_QUEUE);
-
-				INSTANCE->UpdateSenderID(packet->GetSender(), respSenderID);
+				sem_post(&CronenbergController::MSG_QUEUE);
             }else if(type == PacketType::Sync){
                 NodeInfo *senderNode = INSTANCE->GetNodeInfo(packet->GetSender());
                 if(senderNode != NULL){
@@ -242,6 +240,11 @@ void *CronenbergController::BaseRoutine(void *args){
             uint8_t *sendData = new uint8_t[sendLength];
             packet->Parse(sendData, &sendLength);
             INSTANCE->SendData(packet->GetDestination(), sendData, sendLength);
+			if (packet->GetPacketType() == PacketType::ResponseID) {
+				ResponseID *payload = (ResponseID *)packet->GetPayload();
+				INSTANCE->UpdateSenderID(packet->GetSender(), payload->GetReceivedID());
+			}
+
             delete[] sendData;
 
             // remove if no need for ACK
