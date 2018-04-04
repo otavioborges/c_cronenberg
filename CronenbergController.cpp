@@ -36,10 +36,6 @@ bool CronenbergController::VerifyUUID(uint8_t *recvUUID){
 }
 
 void *CronenbergController::NodeRoutine(void *args){
-	struct timespec semaphoreTimeout = {
-		.tv_sec = 0,
-		.tv_nsec = 100000000
-	};
     CronenbergPacket *packet;
     controller_t *arguments = (controller_t *)args;
     uint16_t recvLength;
@@ -154,10 +150,6 @@ void *CronenbergController::NodeRoutine(void *args){
 }
 
 void *CronenbergController::BaseRoutine(void *args){
-	struct timespec semaphoreTimeout = {
-		.tv_sec = 0,
-		.tv_nsec = 100000000
-	};
 	CronenbergPacket *packet;
 	controller_t *arguments = (controller_t *)args;
 
@@ -203,7 +195,6 @@ void *CronenbergController::BaseRoutine(void *args){
                     // add the node
                     arguments->nodes.insert(new NodeInfo(respSenderID));
                 }
-				INSTANCE->UpdateSenderID(packet->GetSender(), respSenderID);
 
                 CronenbergPacket *response =
                     new CronenbergPacket(arguments->senderID, packet->GetSender());
@@ -214,6 +205,8 @@ void *CronenbergController::BaseRoutine(void *args){
                 arguments->outgoing.push_back(outPair(response, INSTANCE->GetTimestamp()));
                 pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
                 sem_post(&CronenbergController::MSG_QUEUE);
+
+				INSTANCE->UpdateSenderID(packet->GetSender(), respSenderID);
             }else if(type == PacketType::Sync){
                 NodeInfo *senderNode = INSTANCE->GetNodeInfo(packet->GetSender());
                 if(senderNode != NULL){
@@ -279,7 +272,6 @@ void CronenbergController::ClearBuffers(void){
 }
 
 NodeInfo *CronenbergController::GetNodeInfo(uint8_t senderID){
-    NodeInfo *senderNode = new NodeInfo(senderID);
     nodeIt nInfo = m_threadArgs.nodes.begin();
 	while (nInfo != m_threadArgs.nodes.end()) {
 		if ((*nInfo)->GetSenderID() == senderID)
