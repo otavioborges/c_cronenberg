@@ -45,7 +45,7 @@ class cronenberg::CronenbergController{
         static void *BaseRoutine(void *args);
         void ClearBuffers(void);
         cronenberg::NodeInfo *GetNodeInfo(uint8_t senderID);
-		CronenbergPacket *GetFirstExpired(void);
+		std::vector<std::pair<CronenbergPacket *, uint32_t>>::iterator GetFirstExpired(void);
     public:
         
         ~CronenbergController(void);
