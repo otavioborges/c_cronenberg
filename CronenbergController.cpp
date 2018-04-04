@@ -142,7 +142,7 @@ void *CronenbergController::NodeRoutine(void *args){
 			}
 
             // remove if no need for ACK
-            if(packetType == PacketType::PingPong || packetType == PacketType::RequestID || packetType == PacketType::ResponseID){
+            if(packetType == PacketType::PingPong || packetType == PacketType::RequestID || packetType == PacketType::ResponseID || packetType == PacketType::AckNack){
                 pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
                 delete packet;
                 arguments->outgoing.erase(nextToSend);
@@ -255,7 +255,7 @@ void *CronenbergController::BaseRoutine(void *args){
 			}
 
 			// remove if no need for ACK
-			if (packetType == PacketType::PingPong || packetType == PacketType::RequestID || packetType == PacketType::ResponseID) {
+			if (packetType == PacketType::PingPong || packetType == PacketType::RequestID || packetType == PacketType::ResponseID || packetType == PacketType::AckNack) {
 				pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
 				delete packet;
 				arguments->outgoing.erase(nextToSend);
