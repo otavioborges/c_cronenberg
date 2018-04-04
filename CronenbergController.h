@@ -62,6 +62,7 @@ class cronenberg::CronenbergController{
         uint32_t GetTimestamp(void);                                         // must be overloaded
         uint8_t GetSenderIDByUUID(uint8_t *uuid);                            // must be overloaded
         void PostData(std::vector<CronenbergData *> *data, NodeInfo sender); // must be overloaded
+		void UpdateSenderID(uint8_t oldID, uint8_t newID);					 // must be overloaded
         uint32_t GetCurrentTimestamp(void);
         uint8_t GetNextPacketID(void);
 

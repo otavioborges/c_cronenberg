@@ -203,6 +203,7 @@ void *CronenbergController::BaseRoutine(void *args){
                     // add the node
                     arguments->nodes.insert(new NodeInfo(respSenderID));
                 }
+				INSTANCE->UpdateSenderID(packet->GetSender(), respSenderID);
 
                 CronenbergPacket *response =
                     new CronenbergPacket(arguments->senderID, packet->GetSender());
