@@ -67,7 +67,7 @@ class cronenberg::CronenbergController{
         uint8_t GetNextPacketID(void);
 
         // Send defined Packets
-        bool SendDataPacket(std::vector<CronenbergData *> data);
+		bool SendDataPacket(vector<CronenbergData *> data, uint8_t destination);
 };
 
 #endif /* CRONENBERCONTROLLER_H_ */

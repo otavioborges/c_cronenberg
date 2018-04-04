@@ -415,9 +415,17 @@ uint8_t CronenbergController::GetNextPacketID(void){
     return m_threadArgs.packetID++;
 }
 
-bool CronenbergController::SendDataPacket(vector<CronenbergData *> data){
+bool CronenbergController::SendDataPacket(vector<CronenbergData *> data, uint8_t destination){
     if(m_threadArgs.running){
+		CronenbergPacket *packet = new CronenbergPacket(m_threadArgs.senderID, destination);
+		packet->AddPayload(new DataPacket(data));
 
+		pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
+		m_threadArgs.outgoing.push_back(outPair(packet, GetTimestamp()));
+		pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
+		sem_post(&CronenbergController::MSG_QUEUE);
+
+		return true;
     }
 
     return false; // controller not running
