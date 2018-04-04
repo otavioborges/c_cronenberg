@@ -198,10 +198,10 @@ void *CronenbergController::BaseRoutine(void *args){
                 RequestID *reqIDPayload = (RequestID *)packet->GetPayload();
                 uint8_t respSenderID = INSTANCE->GetSenderIDByUUID(reqIDPayload->GetUUID());
 
-                NodeInfo *senderNode = INSTANCE->GetNodeInfo(packet->GetSender());
+                NodeInfo *senderNode = INSTANCE->GetNodeInfo(respSenderID);
                 if(senderNode == NULL){
                     // add the node
-                    arguments->nodes.insert(new NodeInfo(packet->GetSender()));
+                    arguments->nodes.insert(new NodeInfo(respSenderID));
                 }
 
                 CronenbergPacket *response =
