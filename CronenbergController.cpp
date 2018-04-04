@@ -251,7 +251,7 @@ void *CronenbergController::BaseRoutine(void *args){
 			PacketType packetType = packet->GetType();
 			if (packetType == PacketType::ResponseID) {
 				ResponseID *payload = (ResponseID *)packet->GetPayload();
-				INSTANCE->UpdateSenderID(packet->GetSender(), payload->GetReceivedID());
+				INSTANCE->UpdateSenderID(packet->GetDestination(), payload->GetReceivedID());
 			}
 
 			// remove if no need for ACK
