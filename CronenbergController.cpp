@@ -248,8 +248,13 @@ void *CronenbergController::BaseRoutine(void *args){
 			INSTANCE->SendData(packet->GetDestination(), sendData, sendLength);
 			delete[] sendData;
 
-			// remove if no need for ACK
 			PacketType packetType = packet->GetType();
+			if (packetType == PacketType::ResponseID) {
+				ResponseID *payload = (ResponseID *)packet->GetPayload();
+				INSTANCE->UpdateSenderID(packet->GetSender(), payload->GetReceivedID());
+			}
+
+			// remove if no need for ACK
 			if (packetType == PacketType::PingPong || packetType == PacketType::RequestID || packetType == PacketType::ResponseID) {
 				pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
 				delete packet;
