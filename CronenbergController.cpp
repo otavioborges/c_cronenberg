@@ -242,7 +242,7 @@ void *CronenbergController::BaseRoutine(void *args){
             INSTANCE->SendData(packet->GetDestination(), sendData, sendLength);
 			if (packet->GetPacketType() == PacketType::ResponseID) {
 				ResponseID *payload = (ResponseID *)packet->GetPayload();
-				INSTANCE->UpdateSenderID(packet->GetSender(), payload->GetReceivedID());
+				INSTANCE->UpdateSenderID(packet->GetDestination(), payload->GetReceivedID());
 			}
 
             delete[] sendData;
