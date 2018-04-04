@@ -14,7 +14,9 @@
 using namespace std;
 using namespace cronenberg;
 
-typedef vector<CronenbergPacket *>::iterator packetIt;
+typedef vector<pair<CronenbergPacket *, uint32_t>>::iterator outputIt;
+typedef vector<CronenbergPacket *>::iterator inputIt;
+typedef pair<CronenbergPacket *, uint32_t> outPair;
 typedef set<NodeInfo *>::iterator nodeIt;
 
 sem_t CronenbergController::MSG_QUEUE;
@@ -58,11 +60,11 @@ void *CronenbergController::NodeRoutine(void *args){
             if(type == PacketType::AckNack){
                 AckNack *ackPayload = (AckNack *)packet->GetPayload();
                 pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-                packetIt it = arguments->outgoing.begin();
+                outputIt it = arguments->outgoing.begin();
                 while(it != arguments->outgoing.end()){
-                    if((*it)->GetPacketID() == ackPayload->GetPacketID()){
+                    if((*it).first->GetPacketID() == ackPayload->GetPacketID()){
                         // remove this msg
-                        delete (*it);
+                        delete (*it).first;
                         arguments->outgoing.erase(it);
 
                         // if waiting sync set it complete!
@@ -108,7 +110,7 @@ void *CronenbergController::NodeRoutine(void *args){
                     INSTANCE->SendData(packet->GetSender(), recvData, recvLength);
 
                     pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-                    arguments->outgoing.push_back(sync);
+                    arguments->outgoing.push_back(outPair(sync, INSTANCE->GetTimestamp()));
                     pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
                     delete[] recvData;
                 }
@@ -116,15 +118,19 @@ void *CronenbergController::NodeRoutine(void *args){
 
             // Clean-up
             pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
-            packetIt it = arguments->incomming.begin();
+            inputIt it = arguments->incomming.begin();
             delete packet;
             arguments->incomming.erase(it);
             pthread_mutex_unlock(&CronenbergController::MUTEX_INCOMMING);
         }else if(arguments->outgoing.size() > 0){
             // thread sending
             pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-            packet = arguments->outgoing[0];
-            pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
+			packet = INSTANCE->GetFirstExpired();
+			pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
+			if (packet == NULL) {
+				usleep(1000);
+				continue; // nothing to do
+			}
 
             uint16_t sendLength = packet->GetLength();
             uint8_t *sendData = new uint8_t[sendLength];
@@ -136,7 +142,7 @@ void *CronenbergController::NodeRoutine(void *args){
             PacketType packetType = packet->GetType();
             if(packetType == PacketType::PingPong || packetType == PacketType::RequestID || packetType == PacketType::ResponseID){
                 pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-                packetIt it = arguments->outgoing.begin();
+                outputIt it = arguments->outgoing.begin();
                 delete packet;
                 arguments->outgoing.erase(it);
                 pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
@@ -163,18 +169,18 @@ void *CronenbergController::BaseRoutine(void *args){
 		//sem_timedwait(&CronenbergController::MSG_QUEUE, &semaphoreTimeout);
         if(arguments->incomming.size() > 0){
             pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
-            packet = arguments->incomming[0];
+			packet = arguments->incomming[0];
             pthread_mutex_unlock(&CronenbergController::MUTEX_INCOMMING);
 
             PacketType type = packet->GetPacketType();
             if(type == PacketType::AckNack){
                 AckNack *ackPayload = (AckNack *)packet->GetPayload();
                 pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-                packetIt it = arguments->outgoing.begin();
+                outputIt it = arguments->outgoing.begin();
                 while(it != arguments->outgoing.end()){
-                    if((*it)->GetPacketID() == ackPayload->GetPacketID()){
+                    if((*it).first->GetPacketID() == ackPayload->GetPacketID()){
                         // remove this msg
-                        delete (*it);
+                        delete (*it).first;
                         arguments->outgoing.erase(it);
                         break; // no need to further search
                     }
@@ -204,7 +210,7 @@ void *CronenbergController::BaseRoutine(void *args){
                 response->AddPayload(resp);
 
                 pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-                arguments->outgoing.push_back(response);
+                arguments->outgoing.push_back(outPair(response, INSTANCE->GetTimestamp()));
                 pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
                 sem_post(&CronenbergController::MSG_QUEUE);
             }else if(type == PacketType::Sync){
@@ -224,15 +230,19 @@ void *CronenbergController::BaseRoutine(void *args){
 
             // Clean-up
             pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
-            packetIt it = arguments->incomming.begin();
+            inputIt it = arguments->incomming.begin();
             delete packet;
             arguments->incomming.erase(it);
             pthread_mutex_unlock(&CronenbergController::MUTEX_INCOMMING);
         }else if(arguments->outgoing.size() > 0){
             // thread sending
-            pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-            packet = arguments->outgoing[0];
-            pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
+			pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
+			packet = INSTANCE->GetFirstExpired();
+			pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
+			if (packet == NULL) {
+				usleep(1000);
+				continue; // nothing to do
+			}
 
             uint16_t sendLength = packet->GetLength();
             uint8_t *sendData = new uint8_t[sendLength];
@@ -244,7 +254,7 @@ void *CronenbergController::BaseRoutine(void *args){
             PacketType packetType = packet->GetType();
             if(packetType == PacketType::PingPong || packetType == PacketType::RequestID || packetType == PacketType::ResponseID){
                 pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-                packetIt it = arguments->outgoing.begin();
+                outputIt it = arguments->outgoing.begin();
                 delete packet;
                 arguments->outgoing.erase(it);
                 pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
@@ -256,14 +266,14 @@ void *CronenbergController::BaseRoutine(void *args){
 }
 
 void CronenbergController::ClearBuffers(void){
-    packetIt it = m_threadArgs.incomming.begin();
+    inputIt it = m_threadArgs.incomming.begin();
     while(it != m_threadArgs.incomming.end())
         delete (*it);
     m_threadArgs.incomming.clear();
 
-    it = m_threadArgs.outgoing.begin();
-    while(it != m_threadArgs.outgoing.end())
-        delete (*it);
+    outputIt oIt = m_threadArgs.outgoing.begin();
+    while(oIt != m_threadArgs.outgoing.end())
+        delete (*oIt).first;
     m_threadArgs.outgoing.clear();
 }
 
@@ -275,6 +285,21 @@ NodeInfo *CronenbergController::GetNodeInfo(uint8_t senderID){
         return (*nInfo);
     else
         return NULL;
+}
+
+CronenbergPacket *CronenbergController::GetFirstExpired(void) {
+	uint32_t now = GetTimestamp();
+	outputIt it = m_threadArgs.outgoing.begin();
+	while (it != m_threadArgs.outgoing.end()) {
+		if ((*it).second < now) {
+			(*it).second = now + CronenbergController::TIMEOUT;
+			return (*it).first;
+		}
+
+		it++;
+	}
+
+	return NULL;
 }
 
 CronenbergController::CronenbergController(void){
@@ -319,7 +344,7 @@ bool CronenbergController::RunNode(void){
 
     m_threadArgs.status = ControllerStatus::WaitingSenderID;
     pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-    m_threadArgs.outgoing.push_back(packet);
+    m_threadArgs.outgoing.push_back(outPair(packet, GetTimestamp()));
     pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
     sem_post(&CronenbergController::MSG_QUEUE);
 
@@ -368,7 +393,7 @@ bool CronenbergController::ReceiveData(uint8_t *data, uint16_t size){
             packet->AddPayload(new AckNack(AckNack::Result::ACK, m_threadArgs.senderID, packetID));
 
             pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-            m_threadArgs.outgoing.push_back(packet);
+            m_threadArgs.outgoing.push_back(outPair(packet, GetTimestamp()));
             pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
             sem_post(&CronenbergController::MSG_QUEUE);
         }

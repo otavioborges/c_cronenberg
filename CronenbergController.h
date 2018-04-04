@@ -15,6 +15,7 @@
 class cronenberg::CronenbergController{
     private:
         static const uint8_t BASE_ID = 0;
+		static const uint32_t TIMEOUT = 200;
         
         static sem_t MSG_QUEUE;
         static pthread_mutex_t MUTEX_INCOMMING;
@@ -29,7 +30,7 @@ class cronenberg::CronenbergController{
             uint32_t pingTime;
             cronenberg::ControllerStatus status;
             std::vector<CronenbergPacket *> incomming;
-            std::vector<CronenbergPacket *> outgoing;
+            std::vector<std::pair<CronenbergPacket *, uint32_t>> outgoing;
             std::set<NodeInfo *> nodes;
             bool running;
         } controller_t;
@@ -44,6 +45,7 @@ class cronenberg::CronenbergController{
         static void *BaseRoutine(void *args);
         void ClearBuffers(void);
         cronenberg::NodeInfo *GetNodeInfo(uint8_t senderID);
+		CronenbergPacket *GetFirstExpired(void);
     public:
         
         ~CronenbergController(void);
