@@ -31,6 +31,8 @@ class cronenberg::CronenbergController{
             cronenberg::ControllerStatus status;
             std::vector<CronenbergPacket *> incomming;
             std::vector<std::pair<CronenbergPacket *, uint32_t>> outgoing;
+			bool connected;
+			uint32_t retries;
             std::set<NodeInfo *> nodes;
             bool running;
         } controller_t;
@@ -56,6 +58,7 @@ class cronenberg::CronenbergController{
         bool RunBase(void);
         
         bool ReceiveData(uint8_t *data, uint16_t size);
+		cronenberg::ControllerStatus GetStatus(void);
         uint8_t GetID(void);
         uint8_t *GetUUID(void);                                              // must be overloaded
         void SendData(uint8_t senderID, uint8_t *data, uint16_t size);       // must be overloaded
@@ -63,6 +66,8 @@ class cronenberg::CronenbergController{
         uint8_t GetSenderIDByUUID(uint8_t *uuid);                            // must be overloaded
         void PostData(std::vector<CronenbergData *> *data, NodeInfo sender); // must be overloaded
 		void UpdateSenderID(uint8_t oldID, uint8_t newID);					 // must be overloaded
+		void Reconnect(void);												 // must be overloaded
+		void Connected(void);
         uint32_t GetCurrentTimestamp(void);
         uint8_t GetNextPacketID(void);
 

@@ -42,10 +42,15 @@ void *CronenbergController::NodeRoutine(void *args){
     uint8_t *recvData;
 
     while(arguments->running){
-		if ((arguments->incomming.size() == 0) && (arguments->outgoing.size() == 0)) {
+		if (((arguments->incomming.size() == 0) && (arguments->outgoing.size() == 0)) || (!arguments->connected)) {
 			usleep(1000);
 			continue;
 		}
+		if (arguments->retries > 30) {
+			arguments->connected = false;
+			INSTANCE->Reconnect();
+		}
+
 		//sem_timedwait(&CronenbergController::MSG_QUEUE, &semaphoreTimeout);
         if(arguments->incomming.size() > 0){
             pthread_mutex_lock(&CronenbergController::MUTEX_INCOMMING);
@@ -54,6 +59,7 @@ void *CronenbergController::NodeRoutine(void *args){
 
             PacketType type = packet->GetPacketType();
             if(type == PacketType::AckNack){
+				arguments->retries = 0;
                 AckNack *ackPayload = (AckNack *)packet->GetPayload();
                 pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
                 outputIt it = arguments->outgoing.begin();
@@ -143,10 +149,12 @@ void *CronenbergController::NodeRoutine(void *args){
 
             // remove if no need for ACK
             if(packetType == PacketType::PingPong || packetType == PacketType::RequestID || packetType == PacketType::ResponseID || packetType == PacketType::AckNack){
-                pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
-                delete packet;
-                arguments->outgoing.erase(nextToSend);
-                pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
+				if (!((packetType == PacketType::RequestID) && (arguments->senderID == 0xFF))) {
+					pthread_mutex_lock(&CronenbergController::MUTEX_OUTPGOING);
+					delete packet;
+					arguments->outgoing.erase(nextToSend);
+					pthread_mutex_unlock(&CronenbergController::MUTEX_OUTPGOING);
+				}
             }
         }
     }
@@ -295,6 +303,7 @@ outputIt CronenbergController::GetFirstExpired(void) {
 	while (it != m_threadArgs.outgoing.end()) {
 		if ((*it).second < now) {
 			(*it).second = now + CronenbergController::TIMEOUT;
+			m_threadArgs.retries++;
 			return it;
 		}
 		it++;
@@ -311,6 +320,8 @@ CronenbergController::CronenbergController(void){
     m_threadArgs.msToTransfer = 0;
     m_threadArgs.pingTime = 0;
     m_threadArgs.running = false;
+	m_threadArgs.retries = 0;
+	m_threadArgs.connected = true;
 }
 
 CronenbergController::~CronenbergController(void){
@@ -403,8 +414,16 @@ bool CronenbergController::ReceiveData(uint8_t *data, uint16_t size){
     return true;
 }
 
+ControllerStatus CronenbergController::GetStatus(void) {
+	return m_threadArgs.status;
+}
+
 uint8_t CronenbergController::GetID(void){
     return m_threadArgs.senderID;
+}
+
+void CronenbergController::Connected(void) {
+	m_threadArgs.connected = true;
 }
 
 uint32_t CronenbergController::GetCurrentTimestamp(void){
